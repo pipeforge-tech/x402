@@ -23,11 +23,15 @@ const ipv4Blocks: Array<[number, number]> = [
 ];
 
 const ipv6Blocks: Array<[bigint, number]> = [
+  [ipv6Number('::'), 96],
   [0n, 128],
   [1n, 128],
+  [ipv6Number('::ffff:0:0'), 96],
+  [ipv6Number('64:ff9b::'), 96],
   [ipv6Number('100::'), 64],
   [ipv6Number('2001::'), 23],
   [ipv6Number('2001:db8::'), 32],
+  [ipv6Number('2002::'), 16],
   [ipv6Number('fc00::'), 7],
   [ipv6Number('fe80::'), 10],
   [ipv6Number('ff00::'), 8],
@@ -78,11 +82,6 @@ export function isPublicAddress(address: string): boolean {
     return !ipv4Blocks.some(([base, prefix]) => inIpv4Block(value, base, prefix));
   }
   if (version === 6) {
-    const lower = address.toLowerCase();
-    if (lower.startsWith('::ffff:')) {
-      const mapped = lower.slice(7);
-      if (isIP(mapped) === 4) return isPublicAddress(mapped);
-    }
     const value = ipv6Number(address);
     return !ipv6Blocks.some(([base, prefix]) => inIpv6Block(value, base, prefix));
   }
