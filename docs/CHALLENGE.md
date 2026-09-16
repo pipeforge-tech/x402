@@ -10,7 +10,8 @@ and GoPlausible's x402 documentation.
 - Run the production endpoint publicly over HTTPS on Algorand MainNet.
 - Settle through `https://facilitator.goplausible.xyz`.
 - Accept Algorand USDC: TestNet ASA `10458941`; MainNet ASA `31566704`.
-- Use the network constants exported by `@x402/avm` rather than copying identifiers.
+- Derive the full genesis-hash network identifier from constants exported by
+  `@x402/avm`; this currently matches GoPlausible's live advertised networks.
 - Keep one stable MainNet `payTo` address for this project and root domain. The
   address must be opted in to MainNet USDC.
 - Enable the Bazaar resource-server discovery extension and declare useful route

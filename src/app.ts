@@ -4,10 +4,11 @@ import type { MiddlewareHandler } from 'hono';
 import { paymentMiddleware, x402ResourceServer } from '@x402/hono';
 import { HTTPFacilitatorClient } from '@x402/core/server';
 import type { ResourceServerExtension } from '@x402/core/types';
+import type { Network } from '@x402/core/types';
 import { ExactAvmScheme } from '@x402/avm/exact/server';
 import {
-  ALGORAND_MAINNET_CAIP2,
-  ALGORAND_TESTNET_CAIP2,
+  ALGORAND_MAINNET_GENESIS_HASH,
+  ALGORAND_TESTNET_GENESIS_HASH,
   USDC_MAINNET_ASA_ID,
   USDC_TESTNET_ASA_ID,
 } from '@x402/avm';
@@ -28,7 +29,9 @@ const exampleReport = {
 };
 
 function payments(config: AppConfig): MiddlewareHandler {
-  const network = config.network === 'mainnet' ? ALGORAND_MAINNET_CAIP2 : ALGORAND_TESTNET_CAIP2;
+  // GoPlausible currently advertises the full genesis-hash CAIP-2 identifiers.
+  const genesisHash = config.network === 'mainnet' ? ALGORAND_MAINNET_GENESIS_HASH : ALGORAND_TESTNET_GENESIS_HASH;
+  const network = `algorand:${genesisHash}` as Network;
   const asset = config.network === 'mainnet' ? USDC_MAINNET_ASA_ID : USDC_TESTNET_ASA_ID;
   const facilitator = new HTTPFacilitatorClient({ url: config.facilitatorUrl });
   const server = new x402ResourceServer(facilitator);

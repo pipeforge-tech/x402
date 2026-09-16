@@ -67,6 +67,15 @@ without a wallet. Set `PAYMENTS_ENABLED=true` only after configuring the public
 TestNet receiver address in `X402_PAY_TO`. Never place a mnemonic or private key
 in the resource-server environment.
 
+### Isolated TestNet payer
+
+`pnpm client:testnet` first validates the unpaid 402 without using a key. A
+payment is attempted only when `CONFIRM_TESTNET_PAYMENT=yes` and
+`AVM_MNEMONIC_FILE` points to an owner-only (`0600`) file outside this
+repository. The client verifies that the signer derives the expected payer
+address before creating a payment. Never put a mnemonic in `.env`, a command
+argument, source control, or chat.
+
 ## TestNet and production
 
 TestNet is the mandatory first payment gate. The receiver and separate payer

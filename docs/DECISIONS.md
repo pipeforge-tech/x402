@@ -21,3 +21,12 @@ to 80/443, with short timeouts and a redirect cap.
 
 Use GoPlausible's hosted facilitator as required by the challenge. Do not run a
 facilitator or store receiver private keys in the resource server.
+
+## 2026-09-16 — GoPlausible network identifier compatibility
+
+`@x402/avm` 2.26 exports truncated canonical CAIP-2 constants, but the live
+GoPlausible `/supported` response and current Algorand tutorial advertise the
+full genesis-hash identifiers. The resource server derives the full identifier
+from the package's exported genesis-hash constant. This avoids a copied magic
+value and matches the facilitator actually required by the challenge. Recheck
+this compatibility point before upgrading x402 packages or moving to MainNet.
