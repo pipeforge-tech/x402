@@ -13,7 +13,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "preflight:mainnet": "tsx scripts/mainnet-preflight.ts"
   },
   "engines": {
     "node": ">=22"

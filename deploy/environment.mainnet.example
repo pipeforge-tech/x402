@@ -1,0 +1,16 @@
+LISTEN_HOST=127.0.0.1
+PORT=4021
+APP_ENV=production
+PUBLIC_BASE_URL=https://x402.pipeforge.tech
+X402_NETWORK=mainnet
+X402_ASSET_ID=31566704
+PAYMENTS_ENABLED=true
+X402_PAY_TO=<OPERATOR_SUPPLIED_FRESH_MAINNET_RECEIVER_ADDRESS>
+X402_PRICE_USD=<OPERATOR_APPROVED_EXPLICIT_USD_PRICE>
+X402_FACILITATOR_URL=https://facilitator.goplausible.xyz
+X402_CHALLENGE_TAG=x402-global-challenge
+INSPECTION_TIMEOUT_MS=5000
+INSPECTION_MAX_REDIRECTS=5
+
+# Never add a payer mnemonic, private key, signing secret, or credential-file
+# location to this resource-server environment.

@@ -1,4 +1,21 @@
 import { InspectionError } from './errors.js';
+import {
+  isValidAlgorandAddress,
+  USDC_MAINNET_ASA_ID,
+  USDC_TESTNET_ASA_ID,
+} from '@x402/avm';
+
+const MAINNET_CHALLENGE_TAG = 'x402-global-challenge';
+const TESTNET_ADDRESSES = new Set([
+  'ADBNOSHDDGCDA4TOJSWM6LTZFIWOMGAZVCR75CY6OKI2K2JFVYMW3U6SLY',
+  '2UXLRFM6JLSAJWBT5QQOOYTVLJECMKMA7B6PLXIPKKOJ4LUW2XIN6EL3RY',
+]);
+const PAYER_CREDENTIAL_ENV_VARS = [
+  'AVM_MNEMONIC_FILE',
+  'AVM_PRIVATE_KEY',
+  'X402_PAYER_MNEMONIC',
+  'X402_PAYER_PRIVATE_KEY',
+] as const;
 
 export interface AppConfig {
   listenHost: '127.0.0.1';
@@ -8,6 +25,7 @@ export interface AppConfig {
   paymentsEnabled: boolean;
   publicBaseUrl?: string;
   payTo?: string;
+  asset: string;
   price: string;
   facilitatorUrl: string;
   challengeTag: string;
@@ -43,9 +61,44 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     }
   }
   if (paymentsEnabled && !publicBaseUrl) throw new Error('PUBLIC_BASE_URL is required when payments are enabled');
+  if (paymentsEnabled && network === 'mainnet' && !publicBaseUrl?.startsWith('https://')) {
+    throw new Error('PUBLIC_BASE_URL must use HTTPS for MainNet');
+  }
   const payTo = env.X402_PAY_TO?.trim();
   if (paymentsEnabled && !payTo) throw new Error('X402_PAY_TO is required when payments are enabled');
-  if (payTo && !/^[A-Z2-7]{58}$/.test(payTo)) throw new Error('X402_PAY_TO must be a 58-character Algorand address');
+  if (payTo && !isValidAlgorandAddress(payTo)) throw new Error('X402_PAY_TO must be a valid Algorand address');
+  const configuredAsset = env.X402_ASSET_ID?.trim();
+  if (paymentsEnabled && network === 'mainnet' && !configuredAsset) {
+    throw new Error('X402_ASSET_ID must be explicitly configured for MainNet');
+  }
+  const asset = configuredAsset ?? (network === 'mainnet' ? USDC_MAINNET_ASA_ID : USDC_TESTNET_ASA_ID);
+  if (network === 'mainnet' && asset !== USDC_MAINNET_ASA_ID) {
+    throw new Error(`MainNet requires USDC ASA ${USDC_MAINNET_ASA_ID}`);
+  }
+  if (network === 'testnet' && asset !== USDC_TESTNET_ASA_ID) {
+    throw new Error(`TestNet requires USDC ASA ${USDC_TESTNET_ASA_ID}`);
+  }
+  const configuredPrice = env.X402_PRICE_USD?.trim();
+  if (paymentsEnabled && network === 'mainnet' && !configuredPrice) {
+    throw new Error('X402_PRICE_USD must be explicitly configured for MainNet');
+  }
+  const price = configuredPrice ?? '$0.02';
+  if (!/^\$(?:0|[1-9]\d*)(?:\.\d{1,6})?$/.test(price) || Number(price.slice(1)) <= 0) {
+    throw new Error('X402_PRICE_USD must be a positive USD amount with at most 6 decimal places');
+  }
+  const challengeTag = env.X402_CHALLENGE_TAG?.trim() ?? MAINNET_CHALLENGE_TAG;
+  if (paymentsEnabled && network === 'mainnet' && challengeTag !== MAINNET_CHALLENGE_TAG) {
+    throw new Error(`MainNet X402_CHALLENGE_TAG must be ${MAINNET_CHALLENGE_TAG}`);
+  }
+  if (paymentsEnabled && network === 'mainnet' && payTo && TESTNET_ADDRESSES.has(payTo)) {
+    throw new Error('MainNet X402_PAY_TO must be a fresh address and must not reuse a known TestNet account');
+  }
+  if (paymentsEnabled && network === 'mainnet') {
+    const credentialVariable = PAYER_CREDENTIAL_ENV_VARS.find(name => Boolean(env[name]?.trim()));
+    if (credentialVariable) {
+      throw new Error(`${credentialVariable} must not exist in the MainNet resource-server environment`);
+    }
+  }
   const facilitatorUrl = env.X402_FACILITATOR_URL ?? 'https://facilitator.goplausible.xyz';
   try {
     const parsed = new URL(facilitatorUrl);
@@ -61,10 +114,18 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     paymentsEnabled,
     ...(publicBaseUrl ? { publicBaseUrl } : {}),
     ...(payTo ? { payTo } : {}),
-    price: env.X402_PRICE_USD ?? '$0.02',
+    asset,
+    price,
     facilitatorUrl,
-    challengeTag: env.X402_CHALLENGE_TAG ?? 'x402-global-challenge',
+    challengeTag,
     timeoutMs: integer(env.INSPECTION_TIMEOUT_MS, 5_000, 250, 30_000),
     maxRedirects: integer(env.INSPECTION_MAX_REDIRECTS, 5, 0, 10),
   };
+}
+
+export function loadMainnetConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
+  const config = loadConfig(env);
+  if (config.network !== 'mainnet') throw new Error('MainNet preflight requires X402_NETWORK=mainnet');
+  if (!config.paymentsEnabled) throw new Error('MainNet preflight requires PAYMENTS_ENABLED=true');
+  return config;
 }

@@ -9,8 +9,6 @@ import { ExactAvmScheme } from '@x402/avm/exact/server';
 import {
   ALGORAND_MAINNET_GENESIS_HASH,
   ALGORAND_TESTNET_GENESIS_HASH,
-  USDC_MAINNET_ASA_ID,
-  USDC_TESTNET_ASA_ID,
 } from '@x402/avm';
 import { bazaarResourceServerExtension, declareDiscoveryExtension } from '@x402-avm/extensions';
 import type { AppConfig } from './config.js';
@@ -32,7 +30,6 @@ function payments(config: AppConfig): MiddlewareHandler {
   // GoPlausible currently advertises the full genesis-hash CAIP-2 identifiers.
   const genesisHash = config.network === 'mainnet' ? ALGORAND_MAINNET_GENESIS_HASH : ALGORAND_TESTNET_GENESIS_HASH;
   const network = `algorand:${genesisHash}` as Network;
-  const asset = config.network === 'mainnet' ? USDC_MAINNET_ASA_ID : USDC_TESTNET_ASA_ID;
   const facilitator = new HTTPFacilitatorClient({ url: config.facilitatorUrl });
   const server = new x402ResourceServer(facilitator);
   server.register(network, new ExactAvmScheme());
@@ -55,7 +52,7 @@ function payments(config: AppConfig): MiddlewareHandler {
           price: config.price,
           network,
           payTo: config.payTo!,
-          extra: { asset, tag: config.challengeTag },
+          extra: { asset: config.asset, tag: config.challengeTag },
         }],
         description: 'Bounded DNS, HTTP(S), TLS, redirects, latency, and security-header inspection of a public Internet hostname.',
         mimeType: 'application/json',
