@@ -8,7 +8,7 @@ import { seedFromMnemonic } from '@algorandfoundation/algokit-utils/algo25';
 
 config();
 
-const expectedPayer = process.env.X402_EXPECTED_PAYER ?? 'QHOH7XUKTVZDPWEJOATQLJGOUCOQZPWRVGY53AGJJREM4UTL4AC3NSMBVQ';
+const expectedPayer = process.env.X402_EXPECTED_PAYER ?? 'ADBNOSHDDGCDA4TOJSWM6LTZFIWOMGAZVCR75CY6OKI2K2JFVYMW3U6SLY';
 const expectedReceiver = process.env.X402_EXPECTED_RECEIVER ?? '2UXLRFM6JLSAJWBT5QQOOYTVLJECMKMA7B6PLXIPKKOJ4LUW2XIN6EL3RY';
 const resourceUrl = process.env.X402_RESOURCE_URL ?? 'http://127.0.0.1:4021/api/v1/inspect?host=example.com';
 const testnetNetwork = `algorand:${ALGORAND_TESTNET_GENESIS_HASH}` as Network;
@@ -58,16 +58,23 @@ async function main(): Promise<void> {
     },
   }, null, 2));
 
-  if (process.env.CONFIRM_TESTNET_PAYMENT !== 'yes') {
-    console.log('Payment not attempted. Set CONFIRM_TESTNET_PAYMENT=yes and AVM_MNEMONIC_FILE to continue.');
+  const mnemonicFile = process.env.AVM_MNEMONIC_FILE;
+  if (!mnemonicFile) {
+    if (process.env.CONFIRM_TESTNET_PAYMENT === 'yes') {
+      throw new Error('AVM_MNEMONIC_FILE is required to sign a payment');
+    }
+    console.log('Credential not checked. Set AVM_MNEMONIC_FILE to verify the payer without paying.');
     return;
   }
-
-  const mnemonicFile = process.env.AVM_MNEMONIC_FILE;
-  if (!mnemonicFile) throw new Error('AVM_MNEMONIC_FILE is required to sign a payment');
   const signer = toClientAvmSigner(await signingKeyFromMnemonicFile(mnemonicFile));
   if (signer.address !== expectedPayer) {
     throw new Error(`Signing credential belongs to ${signer.address}, not the expected payer ${expectedPayer}`);
+  }
+  console.log(JSON.stringify({ credential_verified: true, derived_payer: signer.address }, null, 2));
+
+  if (process.env.CONFIRM_TESTNET_PAYMENT !== 'yes') {
+    console.log('Payment not attempted. Explicit confirmation is still required.');
+    return;
   }
 
   const client = new x402Client().register(testnetNetwork, new ExactAvmScheme(signer));

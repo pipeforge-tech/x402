@@ -73,7 +73,8 @@ in the resource-server environment.
 payment is attempted only when `CONFIRM_TESTNET_PAYMENT=yes` and
 `AVM_MNEMONIC_FILE` points to an owner-only (`0600`) file outside this
 repository. The client verifies that the signer derives the expected payer
-address before creating a payment. Never put a mnemonic in `.env`, a command
+address and prints the derived public address before creating a payment. It
+will not sign or submit unless `CONFIRM_TESTNET_PAYMENT=yes`. Never put a mnemonic in `.env`, a command
 argument, source control, or chat.
 
 ## TestNet and production
