@@ -37,7 +37,7 @@ This audit compares the repository and live public service with the current Algo
 | --- | --- | --- |
 | PASS | Public GitHub repository containing the relevant Algorand code | Anonymous `git ls-remote` verification on 2026-09-17 succeeded for [`pipeforge-tech/x402`](https://github.com/pipeforge-tech/x402). Public `HEAD` resolved to `e15d88ab29fcf036374847a00353d47e5a1ff303`. The repository contains the Algorand/x402 integration in [`src/app.ts`](../src/app.ts), [`src/config.ts`](../src/config.ts), and `package.json`. |
 | PASS | Immutable public submission baseline | Anonymous verification found annotated tag [`x402-challenge-2026-mainnet-validated`](https://github.com/pipeforge-tech/x402/tree/x402-challenge-2026-mainnet-validated), tag object `4e84d3b6b68280591ada73a87eeccdd074c5db9e`, peeling to commit `e15d88ab29fcf036374847a00353d47e5a1ff303`. |
-| MISSING-EVIDENCE | Submit the GitHub repository to Electric Capital | No Electric Capital mutation, issue, or pull-request URL is present in the repository. Record the resulting public URL after submission to [`electric-capital/open-dev-data`](https://github.com/electric-capital/open-dev-data). |
+| PASS | Submit the GitHub repository to Electric Capital | Public [`electric-capital/open-dev-data` PR #2995](https://github.com/electric-capital/open-dev-data/pull/2995), “Add PipeForge x402 Infrastructure Inspector to Algorand,” was verified on 2026-09-17. It is authored by `pipeforge-tech`, links `https://github.com/pipeforge-tech/x402` and the public MainNet endpoint, targets `master`, and is currently open. Submission is complete; merge remains under Electric Capital's control and is not represented as complete. |
 | MISSING-EVIDENCE | Challenge registration completed | No registration confirmation is present. The Official Rules state that initial registration closed at **11:45 p.m. EST on 2026-09-01**. The operator must retain the confirmation email or form receipt. If initial registration was not completed, this is a qualification blocker that documentation changes cannot fix. |
 | MISSING-EVIDENCE | Final project information submitted | No confirmation or submission ID is present. The Official Rules state **11:45 p.m. EST on 2026-09-29**; the public guide says September 30. Use the earlier September 29 deadline and retain the confirmation. The rules say the link is emailed to eligible registered entrants; the current guide also links a [public submission form](https://fjtqz.share-eu1.hsforms.com/2VnFVCiF_Sg26XP85Jxz_bA). |
 | ONGOING | Continue driving real, non-artificial usage through early October | One legitimate MainNet settlement is challenge-attributed. Sustained usage is not yet evidenced. Do not use self-payment loops, retries, wash transactions, or synthetic volume; the rules permit exclusion of manipulated activity. |
@@ -75,8 +75,7 @@ The guide recommends, but does not state as a technical qualification gate, enri
 **The validated payment architecture meets the documented technical qualification requirements. Do not change it for submission closeout.** Remaining work is external and evidentiary:
 
 1. Confirm the entrant registered before the September 1 rules deadline.
-2. Submit the public repository to Electric Capital and retain the public evidence URL.
-3. Submit the final project information by the earlier September 29 deadline and retain confirmation.
-4. Seek genuine usage and capture the final leaderboard position without making self-payments or automated retries.
+2. Submit the final project information by the earlier September 29 deadline and retain confirmation.
+3. Seek genuine usage and capture the final leaderboard position without making self-payments or automated retries.
 
 No additional MainNet payment is needed to cure any repository documentation gap.
