@@ -8,6 +8,7 @@ const config: AppConfig = {
   environment: 'test',
   network: 'testnet',
   paymentsEnabled: false,
+  publicBaseUrl: 'https://x402.pipeforge.tech',
   price: '$0.02',
   facilitatorUrl: 'https://facilitator.goplausible.xyz',
   challengeTag: 'x402-global-challenge',
@@ -30,7 +31,7 @@ describe('HTTP API', () => {
     expect(await response.json()).toMatchObject({ error: { code: 'INVALID_TARGET' } });
   });
 
-  it('returns a TestNet USDC x402 requirement with Bazaar metadata', async () => {
+  it('returns a TestNet USDC x402 requirement with Bazaar metadata and the canonical HTTPS resource URL', async () => {
     const network = 'algorand:SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=';
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({
       kinds: [{ x402Version: 2, scheme: 'exact', network, extra: { feePayer: 'ZMFK2OI7ZBD2U27ISERZC4S6LKM6WMFJPZQ4MYNJDZ2VNBNMBA67RA22AA' } }],
@@ -42,13 +43,20 @@ describe('HTTP API', () => {
         ...config,
         paymentsEnabled: true,
         payTo: '2UXLRFM6JLSAJWBT5QQOOYTVLJECMKMA7B6PLXIPKKOJ4LUW2XIN6EL3RY',
-      }, inspector).request('/api/v1/inspect?host=example.com');
+      }, inspector).request('http://127.0.0.1:4021/api/v1/inspect?host=example.com', {
+        headers: {
+          host: 'x402.pipeforge.tech',
+          'x-forwarded-host': 'x402.pipeforge.tech',
+          'x-forwarded-proto': 'https',
+        },
+      });
       expect(response.status).toBe(402);
       const encoded = response.headers.get('payment-required');
       expect(encoded).toBeTruthy();
       const requirement = JSON.parse(Buffer.from(encoded!, 'base64').toString('utf8')) as {
         x402Version: number;
         accepts: Array<{ network: string; asset: string; amount: string; payTo: string; extra: { tag: string } }>;
+        resource: { url: string };
         extensions?: { bazaar?: unknown };
       };
       expect(requirement.x402Version).toBe(2);
@@ -60,6 +68,36 @@ describe('HTTP API', () => {
         extra: { tag: 'x402-global-challenge' },
       });
       expect(requirement.extensions?.bazaar).toBeTruthy();
+      expect(requirement.resource.url).toBe('https://x402.pipeforge.tech/api/v1/inspect?host=example.com');
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('does not let untrusted forwarding headers alter the canonical resource URL', async () => {
+    const network = 'algorand:SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=';
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({
+      kinds: [{ x402Version: 2, scheme: 'exact', network, extra: { feePayer: 'ZMFK2OI7ZBD2U27ISERZC4S6LKM6WMFJPZQ4MYNJDZ2VNBNMBA67RA22AA' } }],
+      extensions: [],
+      signers: { 'algorand:*': ['ZMFK2OI7ZBD2U27ISERZC4S6LKM6WMFJPZQ4MYNJDZ2VNBNMBA67RA22AA'] },
+    }), { status: 200, headers: { 'content-type': 'application/json' } })));
+    try {
+      const response = await createApp({
+        ...config,
+        paymentsEnabled: true,
+        payTo: '2UXLRFM6JLSAJWBT5QQOOYTVLJECMKMA7B6PLXIPKKOJ4LUW2XIN6EL3RY',
+      }, inspector).request('http://127.0.0.1:4021/api/v1/inspect?host=example.com', {
+        headers: {
+          host: 'attacker.invalid',
+          'x-forwarded-host': 'attacker.invalid',
+          'x-forwarded-proto': 'http',
+        },
+      });
+      const encoded = response.headers.get('payment-required');
+      expect(response.status).toBe(402);
+      expect(encoded).toBeTruthy();
+      const requirement = JSON.parse(Buffer.from(encoded!, 'base64').toString('utf8')) as { resource: { url: string } };
+      expect(requirement.resource.url).toBe('https://x402.pipeforge.tech/api/v1/inspect?host=example.com');
     } finally {
       vi.unstubAllGlobals();
     }

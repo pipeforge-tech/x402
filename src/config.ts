@@ -6,6 +6,7 @@ export interface AppConfig {
   environment: string;
   network: 'testnet' | 'mainnet';
   paymentsEnabled: boolean;
+  publicBaseUrl?: string;
   payTo?: string;
   price: string;
   facilitatorUrl: string;
@@ -28,6 +29,20 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   const network = env.X402_NETWORK ?? 'testnet';
   if (network !== 'testnet' && network !== 'mainnet') throw new Error('X402_NETWORK must be testnet or mainnet');
   const paymentsEnabled = env.PAYMENTS_ENABLED === 'true';
+  const publicBaseUrlValue = env.PUBLIC_BASE_URL?.trim();
+  let publicBaseUrl: string | undefined;
+  if (publicBaseUrlValue) {
+    try {
+      const parsed = new URL(publicBaseUrlValue);
+      const localHttp = parsed.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(parsed.hostname);
+      if (parsed.protocol !== 'https:' && !localHttp) throw new Error();
+      if (parsed.username || parsed.password || parsed.pathname !== '/' || parsed.search || parsed.hash) throw new Error();
+      publicBaseUrl = parsed.origin;
+    } catch {
+      throw new InspectionError('INTERNAL_ERROR', 'PUBLIC_BASE_URL must be an HTTPS origin without credentials, path, query, or fragment');
+    }
+  }
+  if (paymentsEnabled && !publicBaseUrl) throw new Error('PUBLIC_BASE_URL is required when payments are enabled');
   const payTo = env.X402_PAY_TO?.trim();
   if (paymentsEnabled && !payTo) throw new Error('X402_PAY_TO is required when payments are enabled');
   if (payTo && !/^[A-Z2-7]{58}$/.test(payTo)) throw new Error('X402_PAY_TO must be a 58-character Algorand address');
@@ -44,6 +59,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     environment: env.APP_ENV ?? 'development',
     network,
     paymentsEnabled,
+    ...(publicBaseUrl ? { publicBaseUrl } : {}),
     ...(payTo ? { payTo } : {}),
     price: env.X402_PRICE_USD ?? '$0.02',
     facilitatorUrl,

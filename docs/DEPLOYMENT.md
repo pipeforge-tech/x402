@@ -44,7 +44,9 @@ traverse access. The service account has no shell and no write requirement.
 Copy `deploy/environment.testnet.example` to
 `/etc/x402-infra-inspector/environment`, owned by `root:x402-inspector` with mode
 `0640`. `LISTEN_HOST` is intentionally restricted by application validation to
-`127.0.0.1`.
+`127.0.0.1`. `PUBLIC_BASE_URL` is the canonical public HTTPS origin used for
+x402 resource URLs; it is explicit so direct clients cannot influence payment
+requirements with `Host` or `X-Forwarded-*` headers.
 
 The TestNet resource configuration is receiver
 `2UXLRFM6JLSAJWBT5QQOOYTVLJECMKMA7B6PLXIPKKOJ4LUW2XIN6EL3RY`, USDC ASA

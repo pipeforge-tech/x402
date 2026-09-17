@@ -6,6 +6,7 @@ const expected = {
   amount: '20000',
   payTo: '2UXLRFM6JLSAJWBT5QQOOYTVLJECMKMA7B6PLXIPKKOJ4LUW2XIN6EL3RY',
   tag: 'x402-global-challenge',
+  resourceUrl: 'https://x402.pipeforge.tech/api/v1/inspect?host=example.com',
 };
 
 const baseUrl = new URL(process.env.VERIFY_BASE_URL ?? 'http://127.0.0.1:4021');
@@ -26,6 +27,9 @@ const accepted = requirement.accepts?.find(item =>
 );
 if (requirement.x402Version !== 2 || !accepted) throw new Error('Unexpected x402 payment requirement');
 if (!requirement.extensions?.bazaar) throw new Error('Missing Bazaar discovery metadata');
+if (requirement.resource?.url !== expected.resourceUrl) {
+  throw new Error(`Unexpected resource URL: ${requirement.resource?.url ?? 'missing'}`);
+}
 console.log(JSON.stringify({
   endpoint: endpoint.toString(),
   status: response.status,
@@ -37,4 +41,5 @@ console.log(JSON.stringify({
   payTo: accepted.payTo,
   tag: accepted.extra.tag,
   bazaar: true,
+  resourceUrl: requirement.resource.url,
 }, null, 2));

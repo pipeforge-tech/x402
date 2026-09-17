@@ -47,7 +47,7 @@ function payments(config: AppConfig): MiddlewareHandler {
     output: { example: exampleReport },
   });
 
-  return paymentMiddleware(
+  const middleware = paymentMiddleware(
     {
       'GET /api/v1/inspect': {
         accepts: [{
@@ -64,6 +64,20 @@ function payments(config: AppConfig): MiddlewareHandler {
     },
     server,
   );
+
+  return async (context, next) => {
+    const originalRequest = context.req.raw;
+    const incomingUrl = new URL(originalRequest.url);
+    const canonicalUrl = new URL(config.publicBaseUrl!);
+    canonicalUrl.pathname = incomingUrl.pathname;
+    canonicalUrl.search = incomingUrl.search;
+    context.req.raw = new Request(canonicalUrl, originalRequest);
+    try {
+      return await middleware(context, next);
+    } finally {
+      context.req.raw = originalRequest;
+    }
+  };
 }
 
 export function createApp(config: AppConfig, inspector: InfrastructureInspector): Hono {

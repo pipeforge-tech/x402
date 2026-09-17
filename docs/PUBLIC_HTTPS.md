@@ -9,6 +9,11 @@ on Algorand TestNet with TestNet USDC ASA `10458941`, receiver
 micro-USDC, the GoPlausible facilitator, Bazaar metadata, and
 `x402-global-challenge` attribution.
 
+The resource-server environment must contain
+`PUBLIC_BASE_URL=https://x402.pipeforge.tech`. Payment requirements combine this
+trusted configured origin with the incoming path and query. They do not derive
+their public scheme or authority from `Host` or `X-Forwarded-*` headers.
+
 Never place a payer mnemonic, wallet seed, signing key, or Cloudflare API token
 on the resource server. Public validation in this runbook is unpaid and must
 stop at HTTP 402. MainNet requires a separate deployment decision and is not a
