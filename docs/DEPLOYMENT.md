@@ -13,8 +13,9 @@ local Git commit
   -> Node.js on 127.0.0.1:4021
 ```
 
-Caddy, public DNS, WAN NAT, and public TLS are deliberately outside this
-milestone. Caddy can later proxy to the unchanged loopback listener.
+The public TestNet deployment adds Caddy in front of the unchanged loopback
+listener. See `docs/PUBLIC_HTTPS.md` for the staged DNS, NAT/firewall, TLS,
+validation, and rollback procedure.
 
 ## Requirements
 
@@ -93,6 +94,13 @@ ss -lntp | grep ':4021'
 The first request must return HTTP 200. The verifier makes only an unpaid
 request and must report HTTP 402 with the expected TestNet values, Bazaar
 metadata, and challenge tag. It never signs or pays.
+
+For public HTTPS validation, set `VERIFY_BASE_URL` explicitly:
+
+```bash
+VERIFY_BASE_URL=https://x402.pipeforge.tech \
+  node /opt/x402-infra-inspector/current/deploy/verify-402.mjs
+```
 
 Security regression tests are part of `pnpm test` and cover localhost, RFC1918,
 link-local, metadata, reserved IPv4/IPv6, mixed public/private DNS answers,

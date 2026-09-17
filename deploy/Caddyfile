@@ -1,0 +1,4 @@
+x402.pipeforge.tech {
+	log
+	reverse_proxy 127.0.0.1:4021
+}

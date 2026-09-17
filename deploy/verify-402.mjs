@@ -1,4 +1,4 @@
-/* global fetch, Buffer, console */
+/* global fetch, Buffer, console, process, URL */
 
 const expected = {
   network: 'algorand:SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=',
@@ -8,7 +8,10 @@ const expected = {
   tag: 'x402-global-challenge',
 };
 
-const response = await fetch('http://127.0.0.1:4021/api/v1/inspect?host=example.com');
+const baseUrl = new URL(process.env.VERIFY_BASE_URL ?? 'http://127.0.0.1:4021');
+if (!['http:', 'https:'].includes(baseUrl.protocol)) throw new Error('VERIFY_BASE_URL must use HTTP or HTTPS');
+const endpoint = new URL('/api/v1/inspect?host=example.com', baseUrl);
+const response = await fetch(endpoint);
 if (response.status !== 402) throw new Error(`Expected 402, received ${response.status}`);
 const encoded = response.headers.get('payment-required');
 if (!encoded) throw new Error('Missing PAYMENT-REQUIRED header');
@@ -24,6 +27,7 @@ const accepted = requirement.accepts?.find(item =>
 if (requirement.x402Version !== 2 || !accepted) throw new Error('Unexpected x402 payment requirement');
 if (!requirement.extensions?.bazaar) throw new Error('Missing Bazaar discovery metadata');
 console.log(JSON.stringify({
+  endpoint: endpoint.toString(),
   status: response.status,
   x402Version: requirement.x402Version,
   scheme: accepted.scheme,
