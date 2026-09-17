@@ -11,6 +11,7 @@ config();
 const expectedPayer = process.env.X402_EXPECTED_PAYER ?? 'ADBNOSHDDGCDA4TOJSWM6LTZFIWOMGAZVCR75CY6OKI2K2JFVYMW3U6SLY';
 const expectedReceiver = process.env.X402_EXPECTED_RECEIVER ?? '2UXLRFM6JLSAJWBT5QQOOYTVLJECMKMA7B6PLXIPKKOJ4LUW2XIN6EL3RY';
 const resourceUrl = process.env.X402_RESOURCE_URL ?? 'http://127.0.0.1:4021/api/v1/inspect?host=example.com';
+const expectedResourceUrl = process.env.X402_EXPECTED_RESOURCE_URL ?? resourceUrl;
 const testnetNetwork = `algorand:${ALGORAND_TESTNET_GENESIS_HASH}` as Network;
 
 async function signingKeyFromMnemonicFile(path: string): Promise<string> {
@@ -35,6 +36,11 @@ async function main(): Promise<void> {
 
   const parser = new x402HTTPClient(new x402Client());
   const required = parser.getPaymentRequiredResponse(name => initial.headers.get(name), await initial.clone().json());
+  if (required.x402Version !== 2) throw new Error(`Expected x402 version 2, received ${required.x402Version}`);
+  if (required.resource.url !== expectedResourceUrl) {
+    throw new Error(`Expected resource URL ${expectedResourceUrl}, received ${required.resource.url}`);
+  }
+  if (!required.extensions?.bazaar) throw new Error('402 is missing Bazaar discovery metadata');
   const accepted = required.accepts.find(item =>
     item.scheme === 'exact' &&
     item.network === testnetNetwork &&
@@ -43,10 +49,14 @@ async function main(): Promise<void> {
   );
   if (!accepted) throw new Error('402 does not contain the expected Algorand TestNet USDC payment requirement');
   if (accepted.amount !== '20000') throw new Error(`Expected 20000 micro-USDC, received ${accepted.amount}`);
+  if (accepted.extra?.tag !== 'x402-global-challenge') {
+    throw new Error(`Expected x402-global-challenge attribution, received ${String(accepted.extra?.tag)}`);
+  }
 
   console.log(JSON.stringify({
     unpaid_status: initial.status,
     x402_version: required.x402Version,
+    resource_url: required.resource.url,
     requirement: {
       scheme: accepted.scheme,
       network: accepted.network,
