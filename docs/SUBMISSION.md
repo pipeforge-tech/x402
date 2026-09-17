@@ -34,7 +34,8 @@ Agents need infrastructure context before trusting or integrating with an unfami
 - GoPlausible merchant: <https://facilitator.goplausible.xyz/dashboard/merchants/849069d9cc31ff3f>
 - Challenge-filtered resource: <https://facilitator.goplausible.xyz/data/leaderboards?range=all&env=mainnet&src=x402-global-challenge&cat=resources&limit=25&offset=0&q=pipeforge>
 - Challenge-filtered merchant: <https://facilitator.goplausible.xyz/data/leaderboards?range=all&env=mainnet&src=x402-global-challenge&cat=merchants&limit=25&offset=0&group=merchant&q=6Q7MNZLD>
-- Public repository: **MISSING — add after publishing or connecting the intended GitHub repository**
+- Public repository: <https://github.com/pipeforge-tech/x402>
+- Validated baseline tag: <https://github.com/pipeforge-tech/x402/tree/x402-challenge-2026-mainnet-validated> (`e15d88ab29fcf036374847a00353d47e5a1ff303`)
 - Electric Capital submission: **MISSING — add the public mutation/PR URL**
 - Challenge submission form: <https://fjtqz.share-eu1.hsforms.com/2VnFVCiF_Sg26XP85Jxz_bA>
 
@@ -72,8 +73,9 @@ Technical evidence:
 External submission:
 
 - [ ] Confirm and retain evidence of initial challenge registration before the Official Rules deadline.
-- [ ] Publish or connect the public GitHub repository; verify it while logged out.
-- [ ] Add the public repository URL above and to the submission form.
+- [x] Public GitHub repository is anonymously accessible at <https://github.com/pipeforge-tech/x402>.
+- [x] Annotated baseline tag `x402-challenge-2026-mainnet-validated` resolves to commit `e15d88ab29fcf036374847a00353d47e5a1ff303`.
+- [x] Public repository URL and baseline tag are recorded in the submission materials.
 - [ ] Submit the repository to Electric Capital; retain the public mutation/PR URL.
 - [ ] Complete the emailed final-project-information form by **2026-09-29 11:45 p.m. EST** (the earlier of the rules and public-guide dates).
 - [ ] Retain submission confirmation and any entry ID.

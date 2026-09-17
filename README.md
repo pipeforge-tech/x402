@@ -2,11 +2,11 @@
 
 **A live, pay-per-request infrastructure report for humans and autonomous agents, settled in USDC on Algorand MainNet through x402.**
 
-[Try the public endpoint](https://x402.pipeforge.tech/api/v1/inspect?host=example.com) · [MainNet transaction](https://allo.info/tx/XJ7NRFF46DKSLMOZGXZV3QTAKCAGELYUZMBF7P4IIKUVKNEERFIQ) · [Bazaar resource](https://facilitator.goplausible.xyz/dashboard/resources/15cfe43756ea272e) · [GoPlausible merchant](https://facilitator.goplausible.xyz/dashboard/merchants/849069d9cc31ff3f)
+[Public GitHub repository](https://github.com/pipeforge-tech/x402) · [Validated baseline tag](https://github.com/pipeforge-tech/x402/tree/x402-challenge-2026-mainnet-validated) · [Try the public endpoint](https://x402.pipeforge.tech/api/v1/inspect?host=example.com) · [MainNet transaction](https://allo.info/tx/XJ7NRFF46DKSLMOZGXZV3QTAKCAGELYUZMBF7P4IIKUVKNEERFIQ)
 
 The API inspects a public hostname and returns a bounded JSON report covering DNS, HTTP(S), redirects, latency, TLS, and common security headers. A request costs **0.02 USDC** (`20000` micro-USDC) and needs no account, API key, subscription, or billing relationship.
 
-This is a Standard Entry in the 2026 Algorand Global x402 Challenge. Public TestNet and MainNet flows have both been validated end to end. The MainNet evidence baseline is commit `01d7c62c2845d663d13896d1ce384c07bde2804a` and transaction `XJ7NRFF46DKSLMOZGXZV3QTAKCAGELYUZMBF7P4IIKUVKNEERFIQ`.
+This is a Standard Entry in the 2026 Algorand Global x402 Challenge. Public TestNet and MainNet flows have both been validated end to end. The MainNet evidence baseline is commit `01d7c62c2845d663d13896d1ce384c07bde2804a` and transaction `XJ7NRFF46DKSLMOZGXZV3QTAKCAGELYUZMBF7P4IIKUVKNEERFIQ`. The public submission baseline is the annotated tag [`x402-challenge-2026-mainnet-validated`](https://github.com/pipeforge-tech/x402/tree/x402-challenge-2026-mainnet-validated), which resolves to commit `e15d88ab29fcf036374847a00353d47e5a1ff303`.
 
 ## Why this is useful
 
