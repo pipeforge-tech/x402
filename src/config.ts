@@ -1,6 +1,7 @@
 import { InspectionError } from './errors.js';
 
 export interface AppConfig {
+  listenHost: '127.0.0.1';
   port: number;
   environment: string;
   network: 'testnet' | 'mainnet';
@@ -22,6 +23,8 @@ function integer(value: string | undefined, fallback: number, minimum: number, m
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
+  const listenHost = env.LISTEN_HOST ?? '127.0.0.1';
+  if (listenHost !== '127.0.0.1') throw new Error('LISTEN_HOST must be 127.0.0.1');
   const network = env.X402_NETWORK ?? 'testnet';
   if (network !== 'testnet' && network !== 'mainnet') throw new Error('X402_NETWORK must be testnet or mainnet');
   const paymentsEnabled = env.PAYMENTS_ENABLED === 'true';
@@ -36,6 +39,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     throw new InspectionError('INTERNAL_ERROR', 'X402_FACILITATOR_URL must be a valid HTTPS URL');
   }
   return {
+    listenHost,
     port: integer(env.PORT, 4021, 1, 65_535),
     environment: env.APP_ENV ?? 'development',
     network,

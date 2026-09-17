@@ -3,6 +3,7 @@ import { createApp } from '../src/app.js';
 import type { AppConfig } from '../src/config.js';
 
 const config: AppConfig = {
+  listenHost: '127.0.0.1',
   port: 4021,
   environment: 'test',
   network: 'testnet',

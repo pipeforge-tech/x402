@@ -14,10 +14,11 @@ const inspector = new InfrastructureInspector(
 );
 const app = createApp(config, inspector);
 
-const server = serve({ fetch: app.fetch, port: config.port }, info => {
+const server = serve({ fetch: app.fetch, hostname: config.listenHost, port: config.port }, info => {
   console.info(JSON.stringify({
     timestamp: new Date().toISOString(),
     event: 'server_started',
+    host: config.listenHost,
     port: info.port,
     network: config.network,
     payments_enabled: config.paymentsEnabled,
