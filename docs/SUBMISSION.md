@@ -21,6 +21,8 @@ Standard Entry — one paid endpoint offering one atomic service.
 
 Submission confirmation is retained locally outside the repository. The confirmation-page screenshot states “Project submitted” and “We’ve received your project submission” and has SHA-256 `37560923137e92a75ab6a3be9da292b54a448e104b83fbc56d636afe1b31b67f`. The screenshot contains no submission ID. A separate operator-retained Algorand Foundation registration-confirmation email has SHA-256 `ba26d21a820f84472e7fc045e97f57a263c42128f4f8a9ec4fefed3310f47ae9`. Personal email addresses, message metadata, and local filesystem paths are intentionally omitted.
 
+The service was additionally submitted to the independent **x402 List** directory on **September 18, 2026**. Its confirmation states that the submission was received and that endpoint checks and manual review will follow. Directory approval and publication remain pending. The locally retained confirmation screenshot has SHA-256 `4a9c15f2242873581dbbb28ead5d1954656ddd7cd8e0bd215fd8bbd851659063`.
+
 ## Submission-ready description
 
 x402 Infrastructure Inspector is an accountless, pay-per-request API that gives humans and autonomous agents a bounded infrastructure report for a public Internet hostname. For 0.02 USDC, a caller receives machine-readable DNS records, HTTP(S) reachability and status, redirect behavior, latency, TLS certificate validity and metadata, and the presence of common browser security headers.

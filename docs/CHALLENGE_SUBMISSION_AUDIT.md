@@ -45,6 +45,12 @@ This audit compares the repository and live public service with the current Algo
 | ONGOING | Continue driving real, non-artificial usage through early October | One legitimate MainNet settlement is challenge-attributed. Sustained usage is not yet evidenced. Do not use self-payment loops, retries, wash transactions, or synthetic volume; the rules permit exclusion of manipulated activity. |
 | MISSING-EVIDENCE | Top-50 status at the final review window | At audit time the challenge-filtered queries return rank `1` within the filtered result, but leaderboard rank is mutable and the final measurement window is unannounced. Capture the final public result when the Administrator reviews it. |
 
+## Additional directory submission evidence
+
+The service was also submitted to the independent **x402 List** protocol service directory on **2026-09-18**. The confirmation page states: “Submission received. Endpoints will be checked during review. Your service will appear in the directory after manual approval.” This records receipt only; endpoint probing, manual review, approval, and directory publication remain pending and are not represented as complete.
+
+An operator-retained local screenshot of that confirmation has SHA-256 `4a9c15f2242873581dbbb28ead5d1954656ddd7cd8e0bd215fd8bbd851659063`. The screenshot contains no submitted email address, credentials, wallet material, or other secret data.
+
 ## Official Rules items requiring operator attestation
 
 These cannot be proven by repository inspection and remain operator attestations:
