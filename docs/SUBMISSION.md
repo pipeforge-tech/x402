@@ -8,6 +8,19 @@ x402 Infrastructure Inspector
 
 Standard Entry — one paid endpoint offering one atomic service.
 
+## Final submission record
+
+- Project: **PipeForge x402 Infrastructure Inspector**
+- Status: **submitted successfully**
+- Submission date: **September 18, 2026**
+- Public repository: <https://github.com/pipeforge-tech/x402>
+- Public endpoint: <https://x402.pipeforge.tech>
+- Demo video: <https://x402.pipeforge.tech/demo.mp4>
+- Electric Capital submission: <https://github.com/electric-capital/open-dev-data/pull/2995> (PR remains open)
+- MainNet validation transaction: `XJ7NRFF46DKSLMOZGXZV3QTAKCAGELYUZMBF7P4IIKUVKNEERFIQ`
+
+Submission confirmation is retained locally outside the repository. The confirmation-page screenshot states “Project submitted” and “We’ve received your project submission” and has SHA-256 `37560923137e92a75ab6a3be9da292b54a448e104b83fbc56d636afe1b31b67f`. The screenshot contains no submission ID. A separate operator-retained Algorand Foundation registration-confirmation email has SHA-256 `ba26d21a820f84472e7fc045e97f57a263c42128f4f8a9ec4fefed3310f47ae9`. Personal email addresses, message metadata, and local filesystem paths are intentionally omitted.
+
 ## Submission-ready description
 
 x402 Infrastructure Inspector is an accountless, pay-per-request API that gives humans and autonomous agents a bounded infrastructure report for a public Internet hostname. For 0.02 USDC, a caller receives machine-readable DNS records, HTTP(S) reachability and status, redirect behavior, latency, TLS certificate validity and metadata, and the presence of common browser security headers.
@@ -26,8 +39,10 @@ Agents need infrastructure context before trusting or integrating with an unfami
 
 ## Public links
 
+- Project site: <https://x402.pipeforge.tech>
 - Endpoint: <https://x402.pipeforge.tech/api/v1/inspect?host=example.com>
 - Health: <https://x402.pipeforge.tech/health>
+- Demo video: <https://x402.pipeforge.tech/demo.mp4>
 - MainNet transaction: <https://allo.info/tx/XJ7NRFF46DKSLMOZGXZV3QTAKCAGELYUZMBF7P4IIKUVKNEERFIQ>
 - Raw indexed transaction: <https://mainnet-idx.algonode.cloud/v2/transactions/XJ7NRFF46DKSLMOZGXZV3QTAKCAGELYUZMBF7P4IIKUVKNEERFIQ>
 - Bazaar resource: <https://facilitator.goplausible.xyz/dashboard/resources/15cfe43756ea272e>
@@ -72,14 +87,15 @@ Technical evidence:
 
 External submission:
 
-- [ ] Confirm and retain evidence of initial challenge registration before the Official Rules deadline.
+- [x] Algorand Foundation challenge-registration confirmation is retained locally; a privacy-safe evidence digest is recorded above.
 - [x] Public GitHub repository is anonymously accessible at <https://github.com/pipeforge-tech/x402>.
 - [x] Annotated baseline tag `x402-challenge-2026-mainnet-validated` resolves to commit `e15d88ab29fcf036374847a00353d47e5a1ff303`.
 - [x] Public repository URL and baseline tag are recorded in the submission materials.
 - [x] Repository submitted to Electric Capital in [`open-dev-data` PR #2995](https://github.com/electric-capital/open-dev-data/pull/2995); public evidence retained.
-- [ ] Complete the emailed final-project-information form by **2026-09-29 11:45 p.m. EST** (the earlier of the rules and public-guide dates).
-- [ ] Retain submission confirmation and any entry ID.
-- [ ] Re-check the live endpoint, Bazaar records, challenge-filtered leaderboard, and repository immediately before submitting.
+- [x] Final project-information form submitted successfully on **2026-09-18**.
+- [x] Submission confirmation screenshot retained locally and identified above; no entry ID appears in the confirmation.
+- [x] Public endpoint, Bazaar records, challenge-filtered leaderboard, and repository were verified during submission closeout.
+- [ ] Continue retaining evidence of genuine, non-artificial usage through the challenge measurement period.
 - [ ] Confirm operator eligibility, ownership, permissions, and Official Rules attestations.
 - [ ] Capture the final leaderboard status during the review window.
 

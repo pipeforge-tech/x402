@@ -1,9 +1,11 @@
 # Algorand Global x402 Challenge submission audit
 
-- Audit date: **2026-09-17**
+- Audit date: **2026-09-18**
 - Evidence baseline: commit `01d7c62c2845d663d13896d1ce384c07bde2804a`
 - MainNet transaction: `XJ7NRFF46DKSLMOZGXZV3QTAKCAGELYUZMBF7P4IIKUVKNEERFIQ`
 - Public repository: <https://github.com/pipeforge-tech/x402>
+- Public endpoint: <https://x402.pipeforge.tech>
+- Demo video: <https://x402.pipeforge.tech/demo.mp4>
 - Validated baseline tag: [`x402-challenge-2026-mainnet-validated`](https://github.com/pipeforge-tech/x402/tree/x402-challenge-2026-mainnet-validated), an annotated tag that resolves to commit `e15d88ab29fcf036374847a00353d47e5a1ff303`
 
 This audit compares the repository and live public service with the current Algorand Foundation [challenge page](https://algorand.co/global-x402-challenge), [submission guide](https://algorand.co/blog/the-x402-global-challenge-is-live-how-to-build-submit-your-entry), [leaderboard troubleshooting guide](https://algorand.co/blog/is-your-x402-endpoint-showing-up-in-the-facilitator-leaderboard-how-to-troubleshoot-if-not), and [Official Rules](https://algorand.co/hubfs/x402%20competition%20Official%20Rules.pdf).
@@ -38,14 +40,14 @@ This audit compares the repository and live public service with the current Algo
 | PASS | Public GitHub repository containing the relevant Algorand code | Anonymous `git ls-remote` verification on 2026-09-17 succeeded for [`pipeforge-tech/x402`](https://github.com/pipeforge-tech/x402). Public `HEAD` resolved to `e15d88ab29fcf036374847a00353d47e5a1ff303`. The repository contains the Algorand/x402 integration in [`src/app.ts`](../src/app.ts), [`src/config.ts`](../src/config.ts), and `package.json`. |
 | PASS | Immutable public submission baseline | Anonymous verification found annotated tag [`x402-challenge-2026-mainnet-validated`](https://github.com/pipeforge-tech/x402/tree/x402-challenge-2026-mainnet-validated), tag object `4e84d3b6b68280591ada73a87eeccdd074c5db9e`, peeling to commit `e15d88ab29fcf036374847a00353d47e5a1ff303`. |
 | PASS | Submit the GitHub repository to Electric Capital | Public [`electric-capital/open-dev-data` PR #2995](https://github.com/electric-capital/open-dev-data/pull/2995), “Add PipeForge x402 Infrastructure Inspector to Algorand,” was verified on 2026-09-17. It is authored by `pipeforge-tech`, links `https://github.com/pipeforge-tech/x402` and the public MainNet endpoint, targets `master`, and is currently open. Submission is complete; merge remains under Electric Capital's control and is not represented as complete. |
-| MISSING-EVIDENCE | Challenge registration completed | No registration confirmation is present. The Official Rules state that initial registration closed at **11:45 p.m. EST on 2026-09-01**. The operator must retain the confirmation email or form receipt. If initial registration was not completed, this is a qualification blocker that documentation changes cannot fix. |
-| MISSING-EVIDENCE | Final project information submitted | No confirmation or submission ID is present. The Official Rules state **11:45 p.m. EST on 2026-09-29**; the public guide says September 30. Use the earlier September 29 deadline and retain the confirmation. The rules say the link is emailed to eligible registered entrants; the current guide also links a [public submission form](https://fjtqz.share-eu1.hsforms.com/2VnFVCiF_Sg26XP85Jxz_bA). |
+| PASS | Challenge registration completed | An operator-retained Algorand Foundation Outlook confirmation email has the subject “You’re in! Algorand’s Global x402 Challenge registration confirmed.” Its transport record passed SPF, DKIM, and DMARC. The local evidence file is retained outside the repository; its SHA-256 is `ba26d21a820f84472e7fc045e97f57a263c42128f4f8a9ec4fefed3310f47ae9`. No email address or other personal message metadata is reproduced here. |
+| PASS | Final project information submitted and confirmation retained | **PipeForge x402 Infrastructure Inspector** was submitted successfully on **2026-09-18**. The submitted materials identify the [public repository](https://github.com/pipeforge-tech/x402), [public endpoint](https://x402.pipeforge.tech), [demo video](https://x402.pipeforge.tech/demo.mp4), Electric Capital [PR #2995](https://github.com/electric-capital/open-dev-data/pull/2995), and MainNet validation transaction `XJ7NRFF46DKSLMOZGXZV3QTAKCAGELYUZMBF7P4IIKUVKNEERFIQ`. An operator-retained local confirmation-page screenshot displays “Project submitted” and “We’ve received your project submission”; its SHA-256 is `37560923137e92a75ab6a3be9da292b54a448e104b83fbc56d636afe1b31b67f`. The screenshot contains no submission ID. |
 | ONGOING | Continue driving real, non-artificial usage through early October | One legitimate MainNet settlement is challenge-attributed. Sustained usage is not yet evidenced. Do not use self-payment loops, retries, wash transactions, or synthetic volume; the rules permit exclusion of manipulated activity. |
 | MISSING-EVIDENCE | Top-50 status at the final review window | At audit time the challenge-filtered queries return rank `1` within the filtered result, but leaderboard rank is mutable and the final measurement window is unannounced. Capture the final public result when the Administrator reviews it. |
 
 ## Official Rules items requiring operator attestation
 
-These cannot be proven by repository inspection and should be confirmed by the entrant before submission:
+These cannot be proven by repository inspection and remain operator attestations:
 
 - `OPERATOR-ATTESTATION` — every entrant satisfies age, jurisdiction, sanctions, legal-participation, professional-obligation, and English-proficiency requirements.
 - `OPERATOR-ATTESTATION` — each person participates on only one team and the team submits only one project.
@@ -72,10 +74,10 @@ The guide recommends, but does not state as a technical qualification gate, enri
 
 ## Closeout decision
 
-**The validated payment architecture meets the documented technical qualification requirements. Do not change it for submission closeout.** Remaining work is external and evidentiary:
+**The validated payment architecture meets the documented technical qualification requirements, and the final project-information submission is complete. Do not change the payment architecture for submission closeout.** Remaining work is external and evidentiary:
 
-1. Confirm the entrant registered before the September 1 rules deadline.
-2. Submit the final project information by the earlier September 29 deadline and retain confirmation.
-3. Seek genuine usage and capture the final leaderboard position without making self-payments or automated retries.
+1. Continue seeking and retaining evidence of genuine, non-artificial usage through the challenge measurement period without self-payments or automated retries.
+2. Capture final top-50 evidence during the Administrator's review window.
+3. Retain the operator's eligibility, ownership, permissions, and other legal attestations required by the Official Rules.
 
 No additional MainNet payment is needed to cure any repository documentation gap.
