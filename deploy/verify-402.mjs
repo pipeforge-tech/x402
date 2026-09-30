@@ -1,16 +1,33 @@
 /* global fetch, Buffer, console, process, URL */
 
+const baseUrl = new URL(process.env.VERIFY_BASE_URL ?? 'http://127.0.0.1:4021');
+if (!['http:', 'https:'].includes(baseUrl.protocol)) throw new Error('VERIFY_BASE_URL must use HTTP or HTTPS');
+const healthResponse = await fetch(new URL('/health', baseUrl));
+if (!healthResponse.ok) throw new Error(`Health check failed with HTTP ${healthResponse.status}`);
+const health = await healthResponse.json();
+const expectedByNetwork = {
+  testnet: {
+    network: 'algorand:SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=',
+    canonicalNetwork: 'algorand:SGO1GKSzyE7IEPItTxCByw9x8FmnrCDe',
+    asset: '10458941',
+    payTo: '2UXLRFM6JLSAJWBT5QQOOYTVLJECMKMA7B6PLXIPKKOJ4LUW2XIN6EL3RY',
+  },
+  mainnet: {
+    network: 'algorand:wGHE2Pwdvd7S12BL5FaOP20EGYesN73ktiC1qzkkit8=',
+    canonicalNetwork: 'algorand:wGHE2Pwdvd7S12BL5FaOP20EGYesN73k',
+    asset: '31566704',
+    payTo: '6Q7MNZLDJUMRHPPQIV3XPKGWONZQQG4GSFLQMUGG2PDZJHIOCZKVDC3OAU',
+  },
+};
+const networkExpected = expectedByNetwork[health.network];
+if (!networkExpected) throw new Error(`Unexpected health network: ${health.network ?? 'missing'}`);
 const expected = {
-  network: 'algorand:SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=',
-  asset: '10458941',
+  ...networkExpected,
   amount: '20000',
-  payTo: '2UXLRFM6JLSAJWBT5QQOOYTVLJECMKMA7B6PLXIPKKOJ4LUW2XIN6EL3RY',
   tag: 'x402-global-challenge',
   resourceUrl: 'https://x402.pipeforge.tech/api/v1/inspect?host=example.com',
 };
 
-const baseUrl = new URL(process.env.VERIFY_BASE_URL ?? 'http://127.0.0.1:4021');
-if (!['http:', 'https:'].includes(baseUrl.protocol)) throw new Error('VERIFY_BASE_URL must use HTTP or HTTPS');
 const endpoint = new URL('/api/v1/inspect?host=example.com', baseUrl);
 const response = await fetch(endpoint);
 if (response.status !== 402) throw new Error(`Expected 402, received ${response.status}`);
@@ -25,17 +42,28 @@ const accepted = requirement.accepts?.find(item =>
   item.payTo === expected.payTo &&
   item.extra?.tag === expected.tag,
 );
-if (requirement.x402Version !== 2 || !accepted) throw new Error('Unexpected x402 payment requirement');
+const canonicalAccepted = requirement.accepts?.find(item =>
+  item.scheme === 'exact' &&
+  item.network === expected.canonicalNetwork &&
+  item.asset === expected.asset &&
+  item.amount === expected.amount &&
+  item.payTo === expected.payTo &&
+  item.extra?.tag === expected.tag,
+);
+if (requirement.x402Version !== 2 || !accepted || !canonicalAccepted) {
+  throw new Error('Unexpected x402 payment requirement');
+}
 if (!requirement.extensions?.bazaar) throw new Error('Missing Bazaar discovery metadata');
 if (requirement.resource?.url !== expected.resourceUrl) {
   throw new Error(`Unexpected resource URL: ${requirement.resource?.url ?? 'missing'}`);
 }
 console.log(JSON.stringify({
   endpoint: endpoint.toString(),
+  environmentNetwork: health.network,
   status: response.status,
   x402Version: requirement.x402Version,
   scheme: accepted.scheme,
-  network: accepted.network,
+  networks: [accepted.network, canonicalAccepted.network],
   asset: accepted.asset,
   amount: accepted.amount,
   payTo: accepted.payTo,

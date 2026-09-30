@@ -7,12 +7,15 @@ import type { ResourceServerExtension } from '@x402/core/types';
 import type { Network } from '@x402/core/types';
 import { ExactAvmScheme } from '@x402/avm/exact/server';
 import {
+  ALGORAND_MAINNET_CAIP2,
   ALGORAND_MAINNET_GENESIS_HASH,
+  ALGORAND_TESTNET_CAIP2,
   ALGORAND_TESTNET_GENESIS_HASH,
 } from '@x402/avm';
 import { bazaarResourceServerExtension, declareDiscoveryExtension } from '@x402-avm/extensions';
 import type { AppConfig } from './config.js';
 import { publicError } from './errors.js';
+import { AlgorandNetworkCompatibilityFacilitator } from './facilitator.js';
 import type { InfrastructureInspector } from './inspector.js';
 
 const startedAt = Date.now();
@@ -27,12 +30,17 @@ const exampleReport = {
 };
 
 function payments(config: AppConfig): MiddlewareHandler {
-  // GoPlausible currently advertises the full genesis-hash CAIP-2 identifiers.
+  // GoPlausible currently advertises the full genesis-hash identifiers, while
+  // the x402 specification uses truncated CAIP-2 identifiers. Advertise both.
   const genesisHash = config.network === 'mainnet' ? ALGORAND_MAINNET_GENESIS_HASH : ALGORAND_TESTNET_GENESIS_HASH;
-  const network = `algorand:${genesisHash}` as Network;
-  const facilitator = new HTTPFacilitatorClient({ url: config.facilitatorUrl });
+  const legacyNetwork = `algorand:${genesisHash}` as Network;
+  const canonicalNetwork = (config.network === 'mainnet' ? ALGORAND_MAINNET_CAIP2 : ALGORAND_TESTNET_CAIP2) as Network;
+  const facilitator = new AlgorandNetworkCompatibilityFacilitator(
+    new HTTPFacilitatorClient({ url: config.facilitatorUrl }),
+  );
   const server = new x402ResourceServer(facilitator);
-  server.register(network, new ExactAvmScheme());
+  server.register(legacyNetwork, new ExactAvmScheme());
+  server.register(canonicalNetwork, new ExactAvmScheme());
   server.registerExtension(bazaarResourceServerExtension as unknown as ResourceServerExtension);
 
   const discovery = declareDiscoveryExtension({
@@ -47,13 +55,13 @@ function payments(config: AppConfig): MiddlewareHandler {
   const middleware = paymentMiddleware(
     {
       'GET /api/v1/inspect': {
-        accepts: [{
-          scheme: 'exact',
+        accepts: [legacyNetwork, canonicalNetwork].map(network => ({
+          scheme: 'exact' as const,
           price: config.price,
           network,
           payTo: config.payTo!,
           extra: { asset: config.asset, tag: config.challengeTag },
-        }],
+        })),
         description: 'Bounded DNS, HTTP(S), TLS, redirects, latency, and security-header inspection of a public Internet hostname.',
         mimeType: 'application/json',
         extensions: discovery,

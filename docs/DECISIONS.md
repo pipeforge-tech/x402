@@ -30,3 +30,14 @@ full genesis-hash identifiers. The resource server derives the full identifier
 from the package's exported genesis-hash constant. This avoids a copied magic
 value and matches the facilitator actually required by the challenge. Recheck
 this compatibility point before upgrading x402 packages or moving to MainNet.
+
+## 2026-09-30 — Publish both Algorand network identifier spellings
+
+The x402 Foundation specification now requires the truncated Algorand CAIP-2
+identifier, but GoPlausible's live `/supported` response still advertises only
+the legacy full-genesis identifier. Publish both entries in `accepts` so clients
+filtering on either spelling can select the service. A narrow facilitator
+adapter converts the canonical spelling to the legacy spelling only for
+GoPlausible verification and settlement, then restores the client-selected
+network in the settlement response. The established full-genesis entry remains
+first for existing clients and the validated MainNet path remains unchanged.

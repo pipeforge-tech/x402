@@ -68,6 +68,13 @@ describe('HTTP API', () => {
         payTo: '2UXLRFM6JLSAJWBT5QQOOYTVLJECMKMA7B6PLXIPKKOJ4LUW2XIN6EL3RY',
         extra: { tag: 'x402-global-challenge' },
       });
+      expect(requirement.accepts[1]).toMatchObject({
+        network: 'algorand:SGO1GKSzyE7IEPItTxCByw9x8FmnrCDe',
+        asset: '10458941',
+        amount: '20000',
+        payTo: '2UXLRFM6JLSAJWBT5QQOOYTVLJECMKMA7B6PLXIPKKOJ4LUW2XIN6EL3RY',
+        extra: { tag: 'x402-global-challenge' },
+      });
       expect(requirement.extensions?.bazaar).toBeTruthy();
       expect(requirement.resource.url).toBe('https://x402.pipeforge.tech/api/v1/inspect?host=example.com');
     } finally {
@@ -130,6 +137,13 @@ describe('HTTP API', () => {
       };
       expect(requirement.accepts[0]).toMatchObject({
         network,
+        asset: '31566704',
+        amount: '20000',
+        payTo: receiver,
+        extra: { tag: 'x402-global-challenge' },
+      });
+      expect(requirement.accepts[1]).toMatchObject({
+        network: 'algorand:wGHE2Pwdvd7S12BL5FaOP20EGYesN73k',
         asset: '31566704',
         amount: '20000',
         payTo: receiver,
