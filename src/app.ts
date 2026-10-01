@@ -53,6 +53,15 @@ function payments(config: AppConfig): MiddlewareHandler {
     },
     output: { example: exampleReport },
   });
+  const postDiscovery = declareDiscoveryExtension({
+    input: { host: 'example.com' },
+    inputSchema: {
+      properties: { host: { type: 'string', description: 'Public Internet hostname or public IP address' } },
+      required: ['host'],
+    },
+    bodyType: 'json',
+    output: { example: exampleReport },
+  });
 
   const route = {
     accepts: [legacyNetwork, canonicalNetwork].map(network => ({
@@ -64,12 +73,11 @@ function payments(config: AppConfig): MiddlewareHandler {
     })),
     description: resourceDescription,
     mimeType: 'application/json',
-    extensions: discovery,
   };
 
   const middleware = paymentMiddleware({
-    'GET /api/v1/inspect': route,
-    'POST /api/v1/inspect': route,
+    'GET /api/v1/inspect': { ...route, extensions: discovery },
+    'POST /api/v1/inspect': { ...route, extensions: postDiscovery },
   }, server);
 
   return async (context, next) => {
