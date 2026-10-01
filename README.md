@@ -16,6 +16,10 @@ An agent often needs to understand an unfamiliar host before relying on it: does
 
 ### `GET /api/v1/inspect?host=example.com`
 
+The same paid operation is also available as `POST /api/v1/inspect` with a JSON
+body such as `{ "host": "example.com" }`, for clients that probe or invoke paid
+resources with POST.
+
 The paid response contains:
 
 - DNS A, AAAA, MX, and NS records
@@ -35,6 +39,7 @@ The live response is HTTP `402 Payment Required` and advertises:
 x402Version: 2
 scheme: exact
 network: algorand:wGHE2Pwdvd7S12BL5FaOP20EGYesN73ktiC1qzkkit8=
+network: algorand:wGHE2Pwdvd7S12BL5FaOP20EGYesN73k
 asset: 31566704
 amount: 20000
 payTo: 6Q7MNZLDJUMRHPPQIV3XPKGWONZQQG4GSFLQMUGG2PDZJHIOCZKVDC3OAU
@@ -43,7 +48,18 @@ extra.tag: x402-global-challenge
 extensions.bazaar: present
 ```
 
-No payment is made by this command. A compatible x402 client reads the `PAYMENT-REQUIRED` header, signs the exact Algorand asset transfer, and repeats the request with the payment payload. This repository intentionally does not publish a reusable MainNet payer credential or an automatic payment command.
+No payment is made by this command. The same x402 v2 challenge appears in the
+`PAYMENT-REQUIRED` header and JSON response body. A compatible x402 client signs
+the exact Algorand asset transfer and repeats the request with the payment
+payload. This repository intentionally does not publish a reusable MainNet
+payer credential or an automatic payment command.
+
+### Discovery manifest
+
+The public resource-server manifest is available at both
+`/.well-known/x402` (the current domain-discovery draft path) and the deployed
+ecosystem alias `/.well-known/x402.json`. It advertises the paid GET and POST
+resources, permits cross-origin reads, and includes cache metadata.
 
 ### `GET /health`
 
@@ -75,7 +91,12 @@ bounded inspector             Algorand MainNet
     +--> response security headers
 ```
 
-The Hono middleware constructs the x402 offer with the Algorand MainNet genesis-hash network identifier, the `exact` AVM scheme, USDC ASA `31566704`, Bazaar discovery metadata, and the `x402-global-challenge` attribution tag. The resource server stores only the public receiver address. Payer signing material is neither needed nor accepted by the production configuration.
+The Hono middleware constructs the x402 offer with both the facilitator-compatible
+Algorand MainNet genesis-hash identifier and the canonical 32-character CAIP-2
+identifier, the `exact` AVM scheme, USDC ASA `31566704`, Bazaar discovery
+metadata, and the `x402-global-challenge` attribution tag. The resource server
+stores only the public receiver address. Payer signing material is neither
+needed nor accepted by the production configuration.
 
 Key implementation files:
 

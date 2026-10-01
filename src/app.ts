@@ -19,6 +19,8 @@ import { AlgorandNetworkCompatibilityFacilitator } from './facilitator.js';
 import type { InfrastructureInspector } from './inspector.js';
 
 const startedAt = Date.now();
+const resourceDescription = 'Bounded DNS, HTTP(S), TLS, redirects, latency, and security-header inspection of a public Internet hostname.';
+const manifestUpdatedAt = '2026-10-01T00:00:00Z';
 
 const exampleReport = {
   target: 'example.com',
@@ -52,23 +54,23 @@ function payments(config: AppConfig): MiddlewareHandler {
     output: { example: exampleReport },
   });
 
-  const middleware = paymentMiddleware(
-    {
-      'GET /api/v1/inspect': {
-        accepts: [legacyNetwork, canonicalNetwork].map(network => ({
-          scheme: 'exact' as const,
-          price: config.price,
-          network,
-          payTo: config.payTo!,
-          extra: { asset: config.asset, tag: config.challengeTag },
-        })),
-        description: 'Bounded DNS, HTTP(S), TLS, redirects, latency, and security-header inspection of a public Internet hostname.',
-        mimeType: 'application/json',
-        extensions: discovery,
-      },
-    },
-    server,
-  );
+  const route = {
+    accepts: [legacyNetwork, canonicalNetwork].map(network => ({
+      scheme: 'exact' as const,
+      price: config.price,
+      network,
+      payTo: config.payTo!,
+      extra: { asset: config.asset, tag: config.challengeTag },
+    })),
+    description: resourceDescription,
+    mimeType: 'application/json',
+    extensions: discovery,
+  };
+
+  const middleware = paymentMiddleware({
+    'GET /api/v1/inspect': route,
+    'POST /api/v1/inspect': route,
+  }, server);
 
   return async (context, next) => {
     const originalRequest = context.req.raw;
@@ -78,7 +80,27 @@ function payments(config: AppConfig): MiddlewareHandler {
     canonicalUrl.search = incomingUrl.search;
     context.req.raw = new Request(canonicalUrl, originalRequest);
     try {
-      return await middleware(context, next);
+      const response = await middleware(context, next);
+      if (!response) return response;
+      const encodedRequirement = response.headers.get('payment-required');
+      if (response.status !== 402 || !encodedRequirement) return response;
+
+      // x402 v2 defines PAYMENT-REQUIRED as authoritative. Mirroring that
+      // challenge in the JSON body also helps body-reading probes and clients,
+      // without falsely claiming that this v2-only facilitator accepts v1.
+      try {
+        const requirement = JSON.parse(Buffer.from(encodedRequirement, 'base64').toString('utf8')) as unknown;
+        const headers = new Headers(response.headers);
+        headers.delete('content-length');
+        headers.set('content-type', 'application/json; charset=UTF-8');
+        return new Response(JSON.stringify(requirement), {
+          status: response.status,
+          statusText: response.statusText,
+          headers,
+        });
+      } catch {
+        return response;
+      }
     } finally {
       context.req.raw = originalRequest;
     }
@@ -111,11 +133,61 @@ export function createApp(config: AppConfig, inspector: InfrastructureInspector)
     uptime_seconds: Math.floor((Date.now() - startedAt) / 1_000),
   }));
 
+  const discoveryManifest = () => ({
+    x402Version: 2,
+    kind: 'resource-server',
+    name: 'PipeForge x402 Infrastructure Inspector',
+    description: resourceDescription,
+    resources: config.publicBaseUrl ? [
+      {
+        url: `${config.publicBaseUrl}/api/v1/inspect?host=example.com`,
+        method: 'GET',
+        description: resourceDescription,
+      },
+      {
+        url: `${config.publicBaseUrl}/api/v1/inspect`,
+        method: 'POST',
+        description: resourceDescription,
+      },
+    ] : [],
+    attestation: { type: 'none' },
+    docs: 'https://github.com/pipeforge-tech/x402',
+    updated: manifestUpdatedAt,
+  });
+  const serveDiscoveryManifest: MiddlewareHandler = async context => {
+    context.header('Access-Control-Allow-Origin', '*');
+    context.header('Cache-Control', 'public, max-age=3600');
+    return context.json(discoveryManifest());
+  };
+  app.get('/.well-known/x402', serveDiscoveryManifest);
+  app.get('/.well-known/x402.json', serveDiscoveryManifest);
+
   if (config.paymentsEnabled) app.use('/api/v1/inspect', payments(config));
 
   app.get('/api/v1/inspect', async context => {
     const host = context.req.query('host');
     if (!host) return context.json({ error: { code: 'INVALID_TARGET', message: 'Query parameter "host" is required' } }, 400);
+    try {
+      return context.json(await inspector.inspect(host));
+    } catch (error) {
+      const result = publicError(error);
+      return context.json(result.body, result.status as 400);
+    }
+  });
+
+  app.post('/api/v1/inspect', async context => {
+    let body: unknown;
+    try {
+      body = await context.req.json();
+    } catch {
+      return context.json({ error: { code: 'INVALID_TARGET', message: 'JSON body with string field "host" is required' } }, 400);
+    }
+    const host = typeof body === 'object' && body !== null && 'host' in body
+      ? (body as { host?: unknown }).host
+      : undefined;
+    if (typeof host !== 'string' || host.length === 0) {
+      return context.json({ error: { code: 'INVALID_TARGET', message: 'JSON body with string field "host" is required' } }, 400);
+    }
     try {
       return context.json(await inspector.inspect(host));
     } catch (error) {
