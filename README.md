@@ -145,7 +145,7 @@ The public Algorand indexer record is also available as [raw JSON](https://mainn
 
 GoPlausible currently catalogs the endpoint as resource `15cfe43756ea272e` and merchant `849069d9cc31ff3f`:
 
-- [Resource catalog entry](https://facilitator.goplausible.xyz/dashboard/resources/15cfe43756ea272e) — method, description, input schema, output example, TestNet/MainNet accepts, and two successful settlements
+- [Resource catalog entry](https://facilitator.goplausible.xyz/dashboard/resources/15cfe43756ea272e) — method, description, input schema, output example, TestNet/MainNet accepts, and settlement history
 - [Merchant catalog entry](https://facilitator.goplausible.xyz/dashboard/merchants/849069d9cc31ff3f) — MainNet receiver, Bazaar status, and challenge status
 - [Challenge-filtered resource evidence](https://facilitator.goplausible.xyz/data/leaderboards?range=all&env=mainnet&src=x402-global-challenge&cat=resources&limit=25&offset=0&q=pipeforge)
 - [Challenge-filtered merchant evidence](https://facilitator.goplausible.xyz/data/leaderboards?range=all&env=mainnet&src=x402-global-challenge&cat=merchants&limit=25&offset=0&group=merchant&q=6Q7MNZLD)
@@ -193,6 +193,7 @@ This preflight validates configuration only. It does not construct, sign, submit
 
 - [Public TestNet validation](docs/PUBLIC_TESTNET_VALIDATION.md): transaction `OHMTPWPLVJWCIZ4CUYUILAUJHAUXI45XMSHVBGLN2MZ44UMYYT5A`, round `67404046`
 - [Public MainNet validation](docs/PUBLIC_MAINNET_VALIDATION.md): transaction `XJ7NRFF46DKSLMOZGXZV3QTAKCAGELYUZMBF7P4IIKUVKNEERFIQ`, round `65142030`
+- [Public MainNet POST validation](docs/PUBLIC_MAINNET_POST_VALIDATION.md): transaction `JRSIKVFRYD47S6URN5MCOOB4UGG5OUOOUGRZ3OE6PQ4JIZ5DIUDA`, round `65567916`
 - [Submission audit](docs/CHALLENGE_SUBMISSION_AUDIT.md): current PASS / MISSING-EVIDENCE status and external closeout actions
 - [Copy-ready submission text](docs/SUBMISSION.md): project description, usefulness, architecture, evidence, and final checklist
 

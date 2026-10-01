@@ -5,7 +5,8 @@ import { x402Client, x402HTTPClient } from '@x402/fetch';
 import type { Network, PaymentRequired } from '@x402/core/types';
 import { ExactAvmScheme, getTransactionId, toClientAvmSigner } from '@x402/avm';
 
-const resourceUrl = 'https://x402.pipeforge.tech/api/v1/inspect?host=example.com';
+const resourceUrl = 'https://x402.pipeforge.tech/api/v1/inspect';
+const requestBody = JSON.stringify({ host: 'example.com' });
 const network = 'algorand:wGHE2Pwdvd7S12BL5FaOP20EGYesN73ktiC1qzkkit8=' as Network;
 const asset = '31566704';
 const amount = '20000';
@@ -54,6 +55,17 @@ function assertPaymentRequired(required: PaymentRequired): void {
   if (required.x402Version !== 2) throw new Error(`Unexpected x402 version ${required.x402Version}`);
   if (required.resource.url !== resourceUrl) throw new Error(`Unexpected resource URL ${required.resource.url}`);
   if (!required.extensions?.bazaar) throw new Error('Bazaar metadata is missing');
+  const bazaarInput = (required.extensions.bazaar as {
+    info?: { input?: { type?: unknown; method?: unknown; bodyType?: unknown; body?: unknown } };
+  }).info?.input;
+  if (
+    bazaarInput?.type !== 'http' ||
+    bazaarInput.method !== 'POST' ||
+    bazaarInput.bodyType !== 'json' ||
+    JSON.stringify(bazaarInput.body) !== requestBody
+  ) {
+    throw new Error('Live Bazaar metadata does not describe the authorized POST JSON body');
+  }
   const accepted = required.accepts.find(item =>
     item.scheme === 'exact' &&
     item.network === network &&
@@ -83,6 +95,14 @@ async function signerFromExternalMnemonic() {
   ]).toString('base64'));
 }
 
+function request(headers: Record<string, string> = {}): Promise<Response> {
+  return fetch(resourceUrl, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', ...headers },
+    body: requestBody,
+  });
+}
+
 async function main(): Promise<void> {
   const supported = await json(`${facilitatorUrl}/supported`) as {
     kinds?: Array<{ x402Version: number; scheme: string; network: string }>;
@@ -97,14 +117,13 @@ async function main(): Promise<void> {
   ]);
   if (payerBefore.frozen || receiverBefore.frozen) throw new Error('A MainNet USDC holding is frozen');
   if (payerBefore.usdc < Number(amount)) throw new Error(`Payer has only ${payerBefore.usdc} micro-USDC`);
-  if (receiverBefore.usdc !== 0) throw new Error(`Receiver pre-payment balance is ${receiverBefore.usdc}, expected 0`);
 
   const signer = await signerFromExternalMnemonic();
   if (signer.address !== payer) throw new Error(`Derived payer ${signer.address} does not match the authorized payer`);
 
   const client = new x402Client().register(network, new ExactAvmScheme(signer));
   const httpClient = new x402HTTPClient(client);
-  const unpaid = await fetch(resourceUrl);
+  const unpaid = await request();
   if (unpaid.status !== 402) throw new Error(`Expected live HTTP 402, received ${unpaid.status}`);
   const required = httpClient.getPaymentRequiredResponse(name => unpaid.headers.get(name), await unpaid.clone().json());
   assertPaymentRequired(required);
@@ -116,7 +135,7 @@ async function main(): Promise<void> {
   const transactionId = getTransactionId(Buffer.from(avmPayload.paymentGroup[avmPayload.paymentIndex], 'base64'));
   const paymentHeaders = httpClient.encodePaymentSignatureHeader(paymentPayload);
 
-  const paid = await fetch(resourceUrl, { headers: paymentHeaders });
+  const paid = await request(paymentHeaders);
   const settlement = httpClient.getPaymentSettleResponse(name => paid.headers.get(name));
   const body = await paid.json() as Record<string, unknown>;
   const inspectionValid =
@@ -126,6 +145,13 @@ async function main(): Promise<void> {
     typeof body.http === 'object' && body.http !== null &&
     typeof body.tls === 'object' && body.tls !== null &&
     typeof body.security_headers === 'object' && body.security_headers !== null;
+  const [payerAfter, receiverAfter] = await Promise.all([
+    accountState(payer),
+    accountState(receiver),
+  ]);
+  const balanceDeltaValid =
+    payerAfter.usdc === payerBefore.usdc - Number(amount) &&
+    receiverAfter.usdc === receiverBefore.usdc + Number(amount);
 
   console.log(JSON.stringify({
     payment_attempts: 1,
@@ -139,9 +165,17 @@ async function main(): Promise<void> {
     settlement,
     final_http_status: paid.status,
     inspection_valid: inspectionValid,
+    post_payment: { payer: payerAfter, receiver: receiverAfter },
+    balance_delta_valid: balanceDeltaValid,
   }, null, 2));
 
-  if (paid.status !== 200 || !inspectionValid || !settlement.success || settlement.transaction !== transactionId) {
+  if (
+    paid.status !== 200 ||
+    !inspectionValid ||
+    !settlement.success ||
+    settlement.transaction !== transactionId ||
+    !balanceDeltaValid
+  ) {
     throw new Error(`One-shot payment response failed validation; transaction ${transactionId} requires investigation`);
   }
 }
